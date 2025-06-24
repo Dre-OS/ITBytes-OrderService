@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const userSchema = new mongoose.Schema({
+const orderitemSchema = new mongoose.Schema({
   itemid: {
     type: Number,
     index: true,
@@ -18,13 +18,17 @@ const userSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
+    default: item => item.price || 0,
+  },
+  subtotal: {
+    type: Number,
     required: false,
     default: function() {
-        return this.item && this.item.price ? this.item.price * this.quantity : 0;
+        return this.price * this.quantity;
     },
   },
 });
 
-const User = mongoose.model('User', userSchema);
+const OrderItem = mongoose.model('OrderItem', orderitemSchema);
 
-module.exports = User;
+module.exports = OrderItem;

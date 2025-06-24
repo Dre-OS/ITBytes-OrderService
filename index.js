@@ -43,6 +43,95 @@ app.get('/', (req, res) => {
     res.json({ message: 'Welcome to ITBytes Order Service API', docs: '/api/api-docs' });
 })
 
+/** 
+ * @swagger
+ * components:
+ *   schemas:
+ *     Order:
+ *       type: object
+ *       required:
+ *         - customerId
+ *         - items
+ *         - totalAmount
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Auto-generated MongoDB ID
+ *         customerId:
+ *           type: string
+ *           description: ID of the customer who placed the order
+ *         items:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               productId:
+ *                 type: string
+ *                 description: Product ID
+ *               productName:
+ *                 type: string
+ *                 description: Product name
+ *               quantity:
+ *                 type: number
+ *                 description: Quantity ordered
+ *               price:
+ *                 type: number
+ *                 description: Price per item
+ *               subtotal:
+ *                 type: number
+ *                 description: Subtotal for this item
+ *         totalAmount:
+ *           type: number
+ *           description: Total order amount
+ *         status:
+ *           type: string
+ *           enum: [pending, confirmed, processing, shipped, delivered, cancelled]
+ *           description: Order status
+ *           default: pending
+ *         shippingAddress:
+ *           type: object
+ *           properties:
+ *             street:
+ *               type: string
+ *             city:
+ *               type: string
+ *             province:
+ *               type: string
+ *             postalCode:
+ *               type: string
+ *             country:
+ *               type: string
+ *         paymentMethod:
+ *           type: string
+ *           enum: [cash, card, online, gcash]
+ *           description: Payment method used
+ *         paymentStatus:
+ *           type: string
+ *           enum: [pending, paid, failed, refunded]
+ *           description: Payment status
+ *           default: pending
+ *         orderDate:
+ *           type: string
+ *           format: date-time
+ *           description: Date when order was placed
+ *         deliveryDate:
+ *           type: string
+ *           format: date-time
+ *           description: Expected or actual delivery date
+ *         notes:
+ *           type: string
+ *           description: Additional order notes
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Creation timestamp
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Last update timestamp
+ * 
+ */
+
 app.listen(port,"0.0.0.0",  () => {
   console.log(`Example app listening on port ${port}`)
 })

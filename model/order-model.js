@@ -2,38 +2,28 @@ const mongoose = require('mongoose');
 const orderitem = require('./orderitem-model');
 
 const userSchema = new mongoose.Schema({
-  firstname: {
+  customerId: {
     type: String,
     required: true,
   },
-  lastname: {
-    type: String,
+  orders: {
+    type: [orderitem],
     required: true,
   },
-  middlename: {
+  totalprice: {
     type: String,
     required: false,
   },
-  email: {
+  status: {
     type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
+    enum: ['placed','shipped','delivering','delivered'], 
+    default: 'placed',
   },
-  password: {
-    type: String,
-    required: true,
-  },
-  role: {
-    type: String,
-    enum: ['customer', 'admin', 'sales', 'inventory', 'business'], // Define roles as needed
-    default: 'customer',
-  },
-  isActive: {
+  ispayed: {
     type: Boolean,
     default: false,
   },
-  isDeleted: {
+  editable: {
     type: Boolean,
     default: false,
   },
