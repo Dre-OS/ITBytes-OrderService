@@ -32,6 +32,14 @@ const orderSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 orderSchema.pre('save', function(next) {
+  // Calculate subtotal for each order item
+  if (this.orders && this.orders.length > 0) {
+    this.orders.forEach(item => {
+      item.subtotal = item.price * item.quantity;
+    });
+  }
+  
+  // Calculate total price
   this.totalPrice = this.orders.reduce((total, item) => total + item.subtotal, 0);
   next();
 });

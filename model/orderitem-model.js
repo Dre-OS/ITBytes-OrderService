@@ -7,10 +7,20 @@ const orderItemSchema = new mongoose.Schema({
   price: Number,
   subtotal: {
     type: Number,
-    default: function() {
-      return this.price * this.quantity;
-    }
-  },
+    required: false,
+  }
+});
+
+
+// Calculate subtotal before saving
+orderItemSchema.pre('save', function(next) {
+  this.subtotal = this.price * this.quantity;
+  next();
+});
+
+// Add a virtual getter for subtotal
+orderItemSchema.virtual('calculatedSubtotal').get(function() {
+  return this.price * this.quantity;
 });
 
 module.exports = orderItemSchema;
