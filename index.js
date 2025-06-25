@@ -42,7 +42,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://192.168.9.5:3001'
+        url: 'http://localhost:3001'
       }
     ]
   },
@@ -91,6 +91,9 @@ app.get('/', (req, res) => {
  *               quantity:
  *                 type: number
  *                 description: Quantity ordered
+*               price:
+ *                 type: number
+ *                 description: price of the item
  *               subtotal:
  *                 type: number
  *                 description: Subtotal for this item
@@ -123,7 +126,7 @@ app.get('/', (req, res) => {
 
 
 /** * @swagger
- * /orders:
+ * /api/orders:
  *   post:
  *     summary: Create a new order
  *     tags: [Orders]
@@ -156,7 +159,7 @@ router.post('/orders', async (req, res) => {
 
 /**
  * @swagger
- * /orders:
+ * /api/orders:
  *   get:
  *     summary: Get all orders
  *     tags: [Orders]
@@ -182,7 +185,7 @@ router.get('/orders', async (req, res) => {
 
 /**
  * @swagger
- * /orders/{id}:
+ * /api/orders/{id}:
  *   get:
  *     summary: Get an order by ID
  *     tags: [Orders]
@@ -217,7 +220,7 @@ router.get('/orders/:id', async (req, res) => {
 
 /**
  * @swagger
- * /orders/customer/{customerId}:
+ * /api/orders/customer/{customerId}:
  *   get:
  *     summary: Get orders by customer ID
  *     tags: [Orders]
@@ -255,7 +258,7 @@ router.get('/orders/:customerId', async (req, res) => {
 
 /**
  * @swagger
- * /orders/{id}:
+ * /api/orders/{id}:
  *   put:
  *     summary: Update an existing order
  *     tags: [Orders]
