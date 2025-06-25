@@ -65,18 +65,15 @@ app.get('/', (req, res) => {
  *           items:
  *             type: object
  *             properties:
- *               productId:
- *                 type: string
+ *               itemid:
+ *                 type: number
  *                 description: Product ID
- *               productName:
+ *               item:
  *                 type: string
  *                 description: Product name
  *               quantity:
  *                 type: number
  *                 description: Quantity ordered
- *               price:
- *                 type: number
- *                 description: Price per item
  *               subtotal:
  *                 type: number
  *                 description: Subtotal for this item
@@ -101,26 +98,7 @@ app.get('/', (req, res) => {
  *               type: string
  *             country:
  *               type: string
- *         paymentMethod:
- *           type: string
- *           enum: [cash, card, online, gcash]
- *           description: Payment method used
- *         paymentStatus:
- *           type: string
- *           enum: [pending, paid, failed, refunded]
- *           description: Payment status
- *           default: pending
- *         orderDate:
- *           type: string
- *           format: date-time
- *           description: Date when order was placed
- *         deliveryDate:
- *           type: string
- *           format: date-time
- *           description: Expected or actual delivery date
- *         notes:
- *           type: string
- *           description: Additional order notes
+ *         ispayed
  *         createdAt:
  *           type: string
  *           format: date-time
