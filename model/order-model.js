@@ -1,34 +1,41 @@
 const mongoose = require('mongoose');
 const orderitem = require('./orderitem-model');
 
-const userSchema = new mongoose.Schema({
+const orderSchema = new mongoose.Schema({
   customerId: {
     type: String,
     required: true,
+    index: true,
   },
   orders: {
     type: [orderitem],
     required: true,
   },
-  totalprice: {
-    type: String,
+  totalPrice: {
+    type: Number,
     required: false,
+    default: 0,
   },
   status: {
     type: String,
-    enum: ['placed','shipped','delivering','delivered'], 
-    default: 'placed',
+    enum: ['cancelled', 'returned', 'pending', 'confirmed', 'processing', 'placed','shipped','delivering','delivered'], 
+    default: 'pending',
   },
-  ispayed: {
+  isPaid: {
     type: Boolean,
     default: false,
   },
   editable: {
     type: Boolean,
-    default: false,
+    default: true,
   },
 }, { timestamps: true });
 
-const User = mongoose.model('User', userSchema);
+orderSchema.pre('save', function(next) {
+  this.totalPrice = this.orders.reduce((total, item) => total + item.subtotal, 0);
+  next();
+});
 
-module.exports = User;
+const Order = mongoose.model('Order', orderSchema);
+
+module.exports = Order;
