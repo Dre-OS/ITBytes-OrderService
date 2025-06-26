@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios');
 const app = express();
 const port = 3001;
 const mongoose = require('mongoose');
@@ -42,7 +43,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:3001'
+        url: 'http://192.168.9.5:3001'
       }
     ]
   },
@@ -52,7 +53,7 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJSDoc(swaggerOptions);
 
 // Mount the router
-app.use('/api', router);
+app.use('/api/orders', router);
 
 app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
@@ -85,13 +86,13 @@ app.get('/', (req, res) => {
  *               itemId:
  *                 type: string
  *                 description: Product ID
- *               item:
+ *               name:
  *                 type: string
  *                 description: Product name
  *               quantity:
  *                 type: number
  *                 description: Quantity ordered
-*               price:
+ *               price:
  *                 type: number
  *                 description: price of the item
  *               subtotal:
@@ -126,10 +127,10 @@ app.get('/', (req, res) => {
 
 
 /** * @swagger
- * /api/orders:
+ * /api/orders/out:
  *   post:
  *     summary: Create a new order
- *     tags: [Orders]
+ *     tags: [Orders from ITBytes]
  *     requestBody:
  *       required: true
  *       content:
@@ -146,7 +147,7 @@ app.get('/', (req, res) => {
  *       400:
  *         description: Bad request
  */
-router.post('/orders', async (req, res) => {
+router.post('/out', async (req, res) => {
   try {
     console.log(req.body);
     const user = new Order(req.body);
@@ -159,10 +160,10 @@ router.post('/orders', async (req, res) => {
 
 /**
  * @swagger
- * /api/orders:
+ * /api/orders/out:
  *   get:
  *     summary: Get all orders
- *     tags: [Orders]
+ *     tags: [Orders from ITBytes]
  *     responses:
  *       200:
  *         description: List of orders
@@ -173,7 +174,7 @@ router.post('/orders', async (req, res) => {
  *               items:
  *                 $ref: '#/components/schemas/Order'
  */
-router.get('/orders', async (req, res) => {
+router.get('/out', async (req, res) => {
   try {
     const orders = await Order.find();
     res.status(200).json(orders);
@@ -185,10 +186,10 @@ router.get('/orders', async (req, res) => {
 
 /**
  * @swagger
- * /api/orders/{id}:
+ * /api/orders/out/{id}:
  *   get:
  *     summary: Get an order by ID
- *     tags: [Orders]
+ *     tags: [Orders from ITBytes]
  *     parameters:
  *       - in: path
  *         name: id
@@ -208,7 +209,7 @@ router.get('/orders', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-router.get('/orders/:id', async (req, res) => {
+router.get('/out/:id', async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ error: 'User not found' });
@@ -220,10 +221,10 @@ router.get('/orders/:id', async (req, res) => {
 
 /**
  * @swagger
- * /api/orders/customer/{customerId}:
+ * /api/orders/out/customer/{customerId}:
  *   get:
  *     summary: Get orders by customer ID
- *     tags: [Orders]
+ *     tags: [Orders from ITBytes]
  *     parameters:
  *       - in: path
  *         name: customerId
@@ -245,7 +246,7 @@ router.get('/orders/:id', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-router.get('/orders/:customerId', async (req, res) => {
+router.get('/out/:customerId', async (req, res) => {
   try {
     const order = await Order.findOne(req.params.customerId);
     if (!order) return res.status(404).json({ error: 'User not found' });
@@ -258,10 +259,10 @@ router.get('/orders/:customerId', async (req, res) => {
 
 /**
  * @swagger
- * /api/orders/{id}:
+ * /api/orders/out/{id}:
  *   put:
  *     summary: Update an existing order
- *     tags: [Orders]
+ *     tags: [Orders from ITBytes]
  *     parameters:
  *       - in: path
  *         name: id
@@ -287,7 +288,7 @@ router.get('/orders/:customerId', async (req, res) => {
  *       404:
  *         description: Order not found
  */
-router.put('/orders/:id', async (req, res) => {
+router.put('/out/:id', async (req, res) => {
   try {
     const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!order) return res.status(404).json({ error: 'Order not found' });
@@ -298,9 +299,40 @@ router.put('/orders/:id', async (req, res) => {
 });
 
 
+/** * @swagger
+ * /api/orders/out:
+ *   post:
+ *     summary: Create a new order
+ *     tags: [Orders from ITBytes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Order'
+ *     responses:
+ *       201:
+ *         description: Order created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Bad request
+ */
+router.post('/in', async (req, res) => {
+  try {
+    const response = await axios.get(req.body.url);
+    res.status(201).json(response.data);
+    // res.status(201).json(res.body);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
 
 
 
 app.listen(port,"0.0.0.0",  () => {
   console.log(`Example app listening on port ${port}`)
+  console.log(`API Documentation available at http://localhost:${port}/api/api-docs`);
 })
