@@ -12,8 +12,13 @@ const swaggerUi = require('swagger-ui-express');
 const path = require('path');
 const { info } = require('console');
 const swaggerJSDoc = require('swagger-jsdoc');
+const { connectRabbitMQ, publishToTopic, subscribeToTopic } = require('./modules/rabbitmq');
+
 app.use(cors());
 app.use(express.json());
+
+
+
 
 // Connect to MongoDB
 mongoose.connect('mongodb://localhost:27017/itbytes-order', {
