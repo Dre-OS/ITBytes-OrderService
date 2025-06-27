@@ -12,7 +12,8 @@ const swaggerUi = require('swagger-ui-express');
 const path = require('path');
 const { info } = require('console');
 const swaggerJSDoc = require('swagger-jsdoc');
-const { connectRabbitMQ, publishToTopic, subscribeToTopic } = require('./modules/rabbitmq');
+// const { connectRabbitMQ, publishToTopic, subscribeToTopic } = require('./modules/rabbitmq');
+const {orderControllerOut, orderControllerIn} = require('./controller/order-controller');
 
 app.use(cors());
 app.use(express.json());
@@ -152,16 +153,7 @@ app.get('/', (req, res) => {
  *       400:
  *         description: Bad request
  */
-router.post('/out', async (req, res) => {
-  try {
-    console.log(req.body);
-    const user = new Order(req.body);
-    await user.save();
-    res.status(201).json(user);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
+router.post('/out', orderControllerOut.createOrder);
 
 /**
  * @swagger
@@ -179,14 +171,7 @@ router.post('/out', async (req, res) => {
  *               items:
  *                 $ref: '#/components/schemas/Order'
  */
-router.get('/out', async (req, res) => {
-  try {
-    const orders = await Order.find();
-    res.status(200).json(orders);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.get('/out', orderControllerOut.getAllOrders);
 
 
 /**
@@ -214,15 +199,7 @@ router.get('/out', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-router.get('/out/:id', async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ error: 'User not found' });
-    res.status(200).json(order);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.get('/out/:id', orderControllerOut.getOrderById);
 
 /**
  * @swagger
@@ -251,15 +228,7 @@ router.get('/out/:id', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-router.get('/out/customer/:customerId', async (req, res) => {
-  try {
-    const order = await Order.find({ customerId: req.params.customerId });
-    if (!order) return res.status(404).json({ error: 'User not found' });
-    res.status(200).json(order);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.get('/out/customer/:customerId', orderControllerOut.getOrderByCustomerId);
 
 
 /**
@@ -293,15 +262,7 @@ router.get('/out/customer/:customerId', async (req, res) => {
  *       404:
  *         description: Order not found
  */
-router.put('/out/:id', async (req, res) => {
-  try {
-    const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!order) return res.status(404).json({ error: 'Order not found' });
-    res.json(order);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
+router.put('/out/:id', orderControllerOut.updateOrder);
 
 
 /** * @swagger
@@ -325,15 +286,7 @@ router.put('/out/:id', async (req, res) => {
  *       400:
  *         description: Bad request
  */
-router.post('/in', async (req, res) => {
-  try {
-    const response = await axios.get(req.body.url);
-    res.status(201).json(response.data);
-    // res.status(201).json(res.body);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
+router.post('/in', orderControllerIn.createOrder);
 
 
 
