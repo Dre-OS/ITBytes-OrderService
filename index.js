@@ -246,9 +246,9 @@ router.get('/out/:id', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-router.get('/out/:customerId', async (req, res) => {
+router.get('/out/customer/:customerId', async (req, res) => {
   try {
-    const order = await Order.findOne(req.params.customerId);
+    const order = await Order.find({ customerId: req.params.customerId });
     if (!order) return res.status(404).json({ error: 'User not found' });
     res.status(200).json(order);
   } catch (err) {
