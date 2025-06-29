@@ -1,11 +1,13 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const app = express();
-const port = 3001;
+const port = process.env.API_PORT;
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const Order = require('./model/order-model');
+
 const router = express.Router();
 const swaggerUi = require('swagger-ui-express');
 // const swaggerDocument = require('./swagger.json');
@@ -22,7 +24,7 @@ app.use(express.json());
 
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/itbytes-order', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/itbytes-order', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
@@ -49,7 +51,10 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://192.168.9.5:3001'
+        url: process.env.API_URL
+      },
+      {
+        url: "http://localhost:3001"
       }
     ]
   },
@@ -64,7 +69,7 @@ app.use('/api/orders', router);
 app.use('/api/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to ITBytes Order Service API', docs: '/api/api-docs' });
+    res.json({ message: 'Welcome In Order Service API', docs: '/api/api-docs' });
 })
 
 /** 
@@ -81,6 +86,7 @@ app.get('/', (req, res) => {
  *         _id:
  *           type: string
  *           description: Auto-generated MongoDB ID
+ *           ignore: true
  *         customerId:
  *           type: string
  *           description: ID of the customer who placed the order
@@ -136,7 +142,7 @@ app.get('/', (req, res) => {
  * /api/orders/out:
  *   post:
  *     summary: Create a new order
- *     tags: [Orders from ITBytes]
+ *     tags: [Orders Out]
  *     requestBody:
  *       required: true
  *       content:
@@ -160,7 +166,7 @@ router.post('/out', orderControllerOut.createOrder);
  * /api/orders/out:
  *   get:
  *     summary: Get all orders
- *     tags: [Orders from ITBytes]
+ *     tags: [Orders Out]
  *     responses:
  *       200:
  *         description: List of orders
@@ -179,7 +185,7 @@ router.get('/out', orderControllerOut.getAllOrders);
  * /api/orders/out/{id}:
  *   get:
  *     summary: Get an order by ID
- *     tags: [Orders from ITBytes]
+ *     tags: [Orders Out]
  *     parameters:
  *       - in: path
  *         name: id
@@ -206,7 +212,7 @@ router.get('/out/:id', orderControllerOut.getOrderById);
  * /api/orders/out/customer/{customerId}:
  *   get:
  *     summary: Get orders by customer ID
- *     tags: [Orders from ITBytes]
+ *     tags: [Orders Out]
  *     parameters:
  *       - in: path
  *         name: customerId
@@ -236,7 +242,7 @@ router.get('/out/customer/:customerId', orderControllerOut.getOrderByCustomerId)
  * /api/orders/out/{id}:
  *   put:
  *     summary: Update an existing order
- *     tags: [Orders from ITBytes]
+ *     tags: [Orders Out]
  *     parameters:
  *       - in: path
  *         name: id
@@ -266,10 +272,10 @@ router.put('/out/:id', orderControllerOut.updateOrder);
 
 
 /** * @swagger
- * /api/orders/out:
+ * /api/orders/in:
  *   post:
- *     summary: Create a new order
- *     tags: [Orders from ITBytes]
+ *     summary: Create a new incoming order
+ *     tags: [Orders In]
  *     requestBody:
  *       required: true
  *       content:
