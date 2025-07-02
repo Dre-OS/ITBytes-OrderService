@@ -15,6 +15,7 @@ const { info } = require('console');
 const swaggerJSDoc = require('swagger-jsdoc');
 const {orderControllerOut, orderControllerIn} = require('./controller/order-controller');
 const rabbitExpress = require('rabbitmq-express');
+const {MessagingController} = require('./controller/order-messaging-controller');
 const messagingOrders = rabbitExpress();
 const { Topic } = rabbitExpress;
 
@@ -30,7 +31,7 @@ const messagingConfig = {
 
 
 messagingOrders.listen({
-  ...messagingOrdersConfig,
+  ...messagingConfig,
   exchange: 'payment',
   queue: 'payment-events',
   routingKey: 'payment.*', // This will catch all order events
