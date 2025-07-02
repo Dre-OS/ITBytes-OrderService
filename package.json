@@ -17,6 +17,8 @@
     "express": "^5.1.0",
     "mongoose": "^8.16.0",
     "nodemon": "^3.1.10",
+    "rabbitmq-express": "^1.0.4",
+    "rabbitmq-publisher": "^1.0.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   }
