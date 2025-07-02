@@ -1,4 +1,7 @@
 const Order = require("../model/order-model");
+const axios = require('axios');
+const {server, publisher} = require('./order-messaging-controller');
+
 
 const orderControllerOut = {
     createOrder: async (req, res) => {
@@ -6,6 +9,8 @@ const orderControllerOut = {
         console.log(req.body);
         const user = new Order(req.body);
         await user.save();
+        // Publish the order created event
+        publisher.ordercreated(server.channel, Buffer.from(JSON.stringify(req.body)))
         res.status(201).json(user);
       } catch (err) {
         res.status(400).json({ error: err.message });
@@ -46,6 +51,7 @@ const orderControllerOut = {
     updateOrder: async (req, res) => {
       try {
         const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        // publisher.orderupdated(server.channel, Buffer.from(JSON.stringify(req.body)))
         if (!order) return res.status(404).json({ error: 'Order not found' });
         res.json(order);
       } catch (err) {
