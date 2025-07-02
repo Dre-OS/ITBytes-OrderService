@@ -52,7 +52,7 @@ const MessagingController = {
       try {
         const editedOrder = req.body;
         editedOrder.isPaid = true;
-        const order = await Order.findByIdAndUpdate(req.params.id, editedOrder, { new: true, runValidators: true });
+        const order = await Order.findByIdAndUpdate(req.body.id, editedOrder, { new: true, runValidators: true });
         if (!order) return res.status(404).json({ error: 'Order not found' });
         // Publish the order paid event
         await publisher.orderpaid(server.channel, Buffer.from(JSON.stringify(order)));
