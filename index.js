@@ -10,16 +10,49 @@ const Order = require('./model/order-model');
 
 const router = express.Router();
 const swaggerUi = require('swagger-ui-express');
-// const swaggerDocument = require('./swagger.json');
 const path = require('path');
 const { info } = require('console');
 const swaggerJSDoc = require('swagger-jsdoc');
-// const { connectRabbitMQ, publishToTopic, subscribeToTopic } = require('./modules/rabbitmq');
 const {orderControllerOut, orderControllerIn} = require('./controller/order-controller');
+const rabbitExpress = require('rabbitmq-express');
+const messagingOrders = rabbitExpress();
+const { Topic } = rabbitExpress;
 
 app.use(cors());
 app.use(express.json());
 
+
+// Required for RabbitMQ listener
+const messagingConfig = {
+  rabbitURI: process.env.AMQP_URI || 'amqp://guest:guest@localhost:5672',
+  exchangeType: 'topic',
+}
+
+
+messagingOrders.listen({
+  ...messagingOrdersConfig,
+  exchange: 'payment',
+  queue: 'payment-events',
+  routingKey: 'payment.*', // This will catch all order events
+  consumerOptions: { noAck: false }, // Enable explicit acknowledgments
+});
+
+// Then use separate middleware for different message types
+messagingOrders.use('payment.done', MessagingController.paymentDone);
+
+// messagingOrders.use('order.updated', (req, res, next) => {
+//   try {
+//     console.log('Processing order.updated event: ' + JSON.stringify(req.body));
+//     res.awknowledge = true; 
+    
+//     res.status(201).end();
+//   } catch (error) {
+//     console.error('Error processing order.updated event:', error);
+
+//     res.awknowledge = false; 
+//     res.status(500).end();
+//   }
+// });
 
 
 
@@ -296,7 +329,10 @@ router.post('/in', orderControllerIn.createOrder);
 
 
 
+
+
 app.listen(port,"0.0.0.0",  () => {
   console.log(`Example app listening on port ${port}`)
   console.log(`API Documentation available at http://localhost:${port}/api/api-docs`);
 })
+
