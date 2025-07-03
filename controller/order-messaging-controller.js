@@ -52,17 +52,19 @@ const MessagingController = {
       try {
         const editedOrder = req.body;
         editedOrder.isPaid = true;
-        const order = await Order.findByIdAndUpdate(req.params.id, editedOrder, { new: true, runValidators: true });
+        const order = await Order.findByIdAndUpdate(req.body._id, editedOrder, { new: true, runValidators: true });
         if (!order) return res.status(404).json({ error: 'Order not found' });
         // Publish the order paid event
         await publisher.orderpaid(server.channel, Buffer.from(JSON.stringify(order)));
         res.awknowledge = true; // Set acknowledgment flag to true
         // End the response cycle
         res.status(201).end();
-        res.status(201);
-        // res.status(201).json(res.body);
       } catch (err) {
-        res.status(400).json({ error: err.message });
+        console.error('Error processing order.created event:', error);
+        // Reject and requeue the message on error
+        // req.reject(true);
+        res.awknowledge = false; // Set acknowledgment flag to false
+        res.status(500).end();
       }
     },
     orderCancelled: async (req, res) => {
