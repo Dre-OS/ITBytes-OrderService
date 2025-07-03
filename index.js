@@ -16,6 +16,7 @@ const swaggerJSDoc = require('swagger-jsdoc');
 const {orderControllerOut, orderControllerIn} = require('./controller/order-controller');
 const {MessagingController} = require('./controller/order-messaging-controller');
 const rabbitExpress = require('rabbitmq-express');
+const {MessagingController} = require('./controller/order-messaging-controller');
 const messagingOrders = rabbitExpress();
 const { Topic } = rabbitExpress;
 

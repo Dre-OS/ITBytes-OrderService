@@ -1,7 +1,5 @@
 // IMPORTANT: Put these code snippets in index.js
 const rabbitExpress = require('rabbitmq-express');
-const messagingModule = require('rabbitmq-express-messaging');
-const { use } = require('react');
 
 
 // Required for RabbitMQ listener
