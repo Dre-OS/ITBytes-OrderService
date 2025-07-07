@@ -16,7 +16,6 @@ const swaggerJSDoc = require('swagger-jsdoc');
 const {orderControllerOut, orderControllerIn} = require('./controller/order-controller');
 const {MessagingController} = require('./controller/order-messaging-controller');
 const rabbitExpress = require('rabbitmq-express');
-const {MessagingController} = require('./controller/order-messaging-controller');
 const messagingOrders = rabbitExpress();
 const { Topic } = rabbitExpress;
 
@@ -40,7 +39,10 @@ messagingOrders.listen({
 });
 
 // Then use separate middleware for different message types
-messagingOrders.use('payment.done', MessagingController.paymentDone);
+messagingOrders.use('payment.success', MessagingController.paymentDone);
+
+messagingOrders.use('payment.fail', MessagingController.paymentDone);
+
 
 // messagingOrders.use('order.updated', (req, res, next) => {
 //   try {
