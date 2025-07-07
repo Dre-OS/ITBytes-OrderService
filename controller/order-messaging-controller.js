@@ -49,6 +49,10 @@ const publisher = {
 
 const MessagingController = {
     paymentDone: async (req, res) => {
+      // console.log('Processing payment.sucess event');
+      // res.awknowledge = true; // Set acknowledgment flag to true
+      // End the response cycle
+      // res.status(201).end();
       try {
         const editedOrder = req.body;
         editedOrder.isPaid = true;
@@ -60,49 +64,15 @@ const MessagingController = {
         // End the response cycle
         res.status(201).end();
       } catch (err) {
-        console.error('Error processing order.created event:', error);
+        console.error('Error processing order.created event:', err);
         // Reject and requeue the message on error
         // req.reject(true);
         res.awknowledge = false; // Set acknowledgment flag to false
         res.status(500).end();
       }
     },
-    orderCancelled: async (req, res) => {
-      try {
-        const response = await axios.get(req.body.url);
-        res.status(201).json(response.data);
-        // res.status(201).json(res.body);
-      } catch (err) {
-        res.status(400).json({ error: err.message });
-      }
-    },
 }
 
-
-// const server = rabbitExpress();
-
-// const testTopic = new Topic('test');
-// const outTopic = new Topic(':myparam');
-// const noMiddlewareTopic = new Topic('no');
-
-// testTopic.use((req, res) => {
-//   console.log('hello test');
-//   next();
-// });
-// outTopic.use((req, res) => {
-//   console.log('hello out', req.params.myparam);
-//   res.end();
-// });
-
-// outTopic.use(noMiddlewareTopic);
-// testTopic.use(outTopic);
-
-// server.use(testTopic);
-
-// // defined topics here are ['test', 'test.:myparam']
-// console.log(server.topics);
-// // defined patterns here are ['test', 'test.*']
-// console.log(server.patterns);
 
 module.exports = {
   server,
