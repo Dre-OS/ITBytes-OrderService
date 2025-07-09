@@ -39,9 +39,9 @@ messagingOrders.listen({
 });
 
 // Then use separate middleware for different message types
-messagingOrders.use('payment.success', MessagingController.paymentDone);
+messagingOrders.use('payment.processing', MessagingController.paymentSuccess);
 
-messagingOrders.use('payment.fail', MessagingController.paymentDone);
+messagingOrders.use('payment.fail', MessagingController.paymentSuccess);
 
 
 // messagingOrders.use('order.updated', (req, res, next) => {
@@ -307,8 +307,51 @@ router.get('/out/customer/:customerId', orderControllerOut.getOrderByCustomerId)
  */
 router.put('/out/:id', orderControllerOut.updateOrder);
 
+/**
+ * @swagger
+ * /api/orders/out/{id}:
+ *   put:
+ *     summary: Update an existing order
+ *     tags: [Orders Out]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *            required:
+ *              - paymentStatus
+ *            properties:
+ *              id:
+ *                type: string
+ *                description: Order ID
+ *              paymentStatus:
+ *                type: string
+ *                enum: [pending, processing, paid, failed, refunded]
+ *     responses:
+ *       200:
+ *         description: Order updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Order not found
+ */
+router.put('/out/pay/:id', orderControllerOut.updateOrderPaymentStatus);
 
-/** * @swagger
+
+/**
+ * @swagger
  * /api/orders/in:
  *   post:
  *     summary: Create a new incoming order
@@ -318,18 +361,56 @@ router.put('/out/:id', orderControllerOut.updateOrder);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Order'
+ *             type: object
+ *             required:
+ *               - quantity
+ *               - totalPrice
+ *               - product
+ *             properties:
+ *               productId:
+ *                 type: string
+ *                 description: ID of the product
+ *               name:
+ *                 type: string
+ *                 description: Name of the product
+ *               quantity:
+ *                 type: number
+ *                 description: Quantity of the product
+ *               totalPrice:
+ *                 type: number
+ *                 description: Total price of the order
+ *               product:
+ *                 type: object
+ *                 description: Product details
  *     responses:
  *       201:
  *         description: Order created successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Order'
+ *             type: object
+ *             properties:
+ *               productId:
+ *                 type: string
+ *                 description: ID of the product
+ *               name:
+ *                 type: string
+ *                 description: Name of the product
+ *               quantity:
+ *                 type: number
+ *                 description: Quantity of the product
+ *               totalPrice:
+ *                 type: number
+ *                 description: Total price of the order
+ *               product:
+ *                 type: object
+ *                 description: Product details
  *       400:
  *         description: Bad request
  */
 router.post('/in', orderControllerIn.createOrder);
+
+
 
 
 
