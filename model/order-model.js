@@ -21,9 +21,10 @@ const orderSchema = new mongoose.Schema({
     enum: ['cancelled', 'returned', 'pending', 'confirmed', 'processing', 'placed','shipped','delivering','delivered'], 
     default: 'pending',
   },
-  isPaid: {
-    type: Boolean,
-    default: false,
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'processing', 'paid', 'failed', 'refunded'],
+    default: 'pending',
   },
   editable: {
     type: Boolean,
