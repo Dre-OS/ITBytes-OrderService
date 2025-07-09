@@ -101,14 +101,14 @@ const orderControllerIn = {
       }
     },
 
-    // getAllOrders: async (req, res) => {
-    //   try {
-    //     const orders = await OrderIn.find();
-    //     res.status(200).json(orders);
-    //   } catch (err) {
-    //     res.status(500).json({ error: err.message });
-    //   }
-    // },
+    getAllOrders: async (req, res) => {
+      try {
+        const orders = await OrderIn.find();
+        res.status(200).json(orders);
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    },
 
     // getOrderById: async (req, res) => {
     //   try {
