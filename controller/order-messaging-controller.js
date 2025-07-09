@@ -41,21 +41,33 @@ function createTopicPublisher(routingKey, exchange, queueName, options) {
 
 
 const publisher = {
-  // paymentpending: createTopicPublisher('payment.pending', 'payment', 'payment-events', null),
+  orderpayattempt: createTopicPublisher('order.pay.attempt', 'order', 'order-events', null),
   orderpaid: createTopicPublisher('order.paid', 'order', 'order-events', null),
   ordercreated: createTopicPublisher('order.created', 'order', 'order-events', null),
   ordercancelled: createTopicPublisher('order.cancelled', 'order', 'order-events', null),
 }
 
 const MessagingController = {
-    paymentDone: async (req, res) => {
-      // console.log('Processing payment.sucess event');
-      // res.awknowledge = true; // Set acknowledgment flag to true
-      // End the response cycle
-      // res.status(201).end();
+    paymentProcessing: async (req, res) => {
+      try {
+        const editedOrder = req.body
+        editedOrder.paymentStatus = "processing";
+        const order = await Order.findByIdAndUpdate(req.body._id, editedOrder, { new: true, runValidators: true });
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+        res.awknowledge = true;
+        res.status(201).end();
+      } catch (error) {
+        console.error('Error processing payment.processing event:', err);
+        // Reject and requeue the message on error
+        // req.reject(true);
+        res.awknowledge = false; // Set acknowledgment flag to false
+        res.status(500).end();
+      }
+    },
+    paymentSuccess: async (req, res) => {
       try {
         const editedOrder = req.body;
-        editedOrder.isPaid = true;
+        editedOrder.paymentStatus = "paid";
         const order = await Order.findByIdAndUpdate(req.body._id, editedOrder, { new: true, runValidators: true });
         if (!order) return res.status(404).json({ error: 'Order not found' });
         // Publish the order paid event
@@ -64,13 +76,14 @@ const MessagingController = {
         // End the response cycle
         res.status(201).end();
       } catch (err) {
-        console.error('Error processing order.created event:', err);
+        console.error('Error processing payment.success event:', err);
         // Reject and requeue the message on error
         // req.reject(true);
         res.awknowledge = false; // Set acknowledgment flag to false
         res.status(500).end();
       }
     },
+
 }
 
 
