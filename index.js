@@ -326,15 +326,15 @@ router.put('/out/:id', orderControllerOut.updateOrder);
  *         application/json:
  *           schema:
  *             type: object
- *            required:
- *              - paymentStatus
- *            properties:
- *              id:
- *                type: string
- *                description: Order ID
- *              paymentStatus:
- *                type: string
- *                enum: [pending, processing, paid, failed, refunded]
+ *             required:
+ *               - paymentStatus
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: Order ID
+ *               paymentStatus:
+ *                 type: string
+ *                 enum: [pending, processing, paid, failed, refunded]
  *     responses:
  *       200:
  *         description: Order updated successfully
@@ -388,29 +388,75 @@ router.put('/out/pay/:id', orderControllerOut.updateOrderPaymentStatus);
  *         content:
  *           application/json:
  *             schema:
- *             type: object
- *             properties:
- *               productId:
- *                 type: string
- *                 description: ID of the product
- *               name:
- *                 type: string
- *                 description: Name of the product
- *               quantity:
- *                 type: number
- *                 description: Quantity of the product
- *               totalPrice:
- *                 type: number
- *                 description: Total price of the order
- *               product:
- *                 type: object
- *                 description: Product details
+ *               type: object
+ *               properties:
+ *                 productId:
+ *                   type: string
+ *                   description: ID of the product
+ *                 name:
+ *                   type: string
+ *                   description: Name of the product
+ *                 quantity:
+ *                   type: number
+ *                   description: Quantity of the product
+ *                 totalPrice:
+ *                   type: number
+ *                   description: Total price of the order
+ *                 product:
+ *                   type: object
+ *                   description: Product details
  *       400:
  *         description: Bad request
  */
 router.post('/in', orderControllerIn.createOrder);
 
 
+/**
+ * @swagger
+ * /api/orders/in:
+ *   get:
+ *     summary: Get all incoming orders
+ *     tags: [Orders In]
+ *     responses:
+ *       200:
+ *         description: List of incoming orders
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                     description: Order ID
+ *                   productId:
+ *                     type: string
+ *                     description: ID of the product
+ *                   name:
+ *                     type: string
+ *                     description: Name of the product
+ *                   quantity:
+ *                     type: number
+ *                     description: Quantity of the product
+ *                   totalPrice:
+ *                     type: number
+ *                     description: Total price of the order
+ *                   product:
+ *                     type: object
+ *                     description: Product details
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                     description: Creation timestamp
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *                     description: Last update timestamp
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/in', orderControllerIn.getAllOrders);
 
 
 
