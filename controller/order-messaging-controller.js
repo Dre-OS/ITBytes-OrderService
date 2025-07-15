@@ -55,7 +55,7 @@ const publisher = {
   ),
   orderpayattempt: createTopicPublisher('order.pay.attempt', 'order', 'order-events', null),
   orderpayattemptfailed: createTopicPublisher('order.pay.attempt.failed', 'order', 'order-events', null),
-  // orderpaid: createTopicPublisher('order.paid', 'order', 'order-events', null),
+  orderpaid: createTopicPublisher('order.paid', 'order', 'order-events', null),
   orderallocateattempt: createTopicPublisher('order.allocate.attempt', 'order', 'order-events', null),
   orderallocatefailed: createTopicPublisher('order.allocate.failed', 'order', 'order-events', null),
   orderallocatesucess: createTopicPublisher('order.allocate.success', 'order', 'order-events', null),
@@ -167,9 +167,9 @@ const MessagingController = {
             allocated: true // Set allocated to true for each order item
           };
         })
-        order = await Order.findByIdAndUpdate(req.params.id, order, { new: true, runValidators: true });
-        if (!order) {
-          console.error('Order not found for ID:', req.params.id);
+        const newOrder = await Order.findByIdAndUpdate(order._id, order, { new: true, runValidators: true });
+        if (!newOrder) {
+          console.error('Order not found for ID:', order._id);
           res.awknowledge = false; // Set acknowledgment flag to false
           return res.status(404).end(); // Not found if order does not exist
         }
