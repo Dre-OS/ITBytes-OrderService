@@ -4,20 +4,14 @@ const axios = require('axios');
 const app = express();
 const port = process.env.API_PORT;
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const cors = require('cors');
-const Order = require('./model/order-model');
-
 const router = express.Router();
 const swaggerUi = require('swagger-ui-express');
-const path = require('path');
-const { info } = require('console');
 const swaggerJSDoc = require('swagger-jsdoc');
 const {orderControllerOut, orderControllerIn} = require('./controller/order-controller');
 const {MessagingController} = require('./controller/order-messaging-controller');
 const rabbitExpress = require('rabbitmq-express');
 const messagingOrders = rabbitExpress();
-const { Topic } = rabbitExpress;
 
 app.use(cors());
 app.use(express.json());
@@ -38,10 +32,29 @@ messagingOrders.listen({
   consumerOptions: { noAck: false }, // Enable explicit acknowledgments
 });
 
-// Then use separate middleware for different message types
-messagingOrders.use('payment.processing', MessagingController.paymentSuccess);
+messagingOrders.listen({
+  ...messagingConfig,
+  exchange: 'inventory',
+  queue: 'inventory-events',
+  routingKey: 'inventory.*', // This will catch all order events
+  consumerOptions: { noAck: false }, // Enable explicit acknowledgments
+});
 
-messagingOrders.use('payment.fail', MessagingController.paymentSuccess);
+// Then use separate middleware for different message types
+messagingOrders.use('payment.success', MessagingController.paymentSuccess);
+
+messagingOrders.use('payment.fail', MessagingController.paymentFailed);
+
+messagingOrders.use('payment.processing', MessagingController.paymentProcessing);
+
+messagingOrders.use('inventory.stock.updated', MessagingController.inventoryStockUpdate);
+
+
+
+// messagingOrders.use('payment.success', MessagingController.paymentSuccess);
+
+
+
 
 
 // messagingOrders.use('order.updated', (req, res, next) => {
@@ -175,7 +188,8 @@ app.get('/', (req, res) => {
  */
 
 
-/** * @swagger
+/** 
+ * @swagger
  * /api/orders/out:
  *   post:
  *     summary: Create a new order
@@ -311,7 +325,7 @@ router.put('/out/:id', orderControllerOut.updateOrder);
  * @swagger
  * /api/orders/out/{id}:
  *   put:
- *     summary: Update an existing order
+ *     summary: Update payment status of an existing order
  *     tags: [Orders Out]
  *     parameters:
  *       - in: path
@@ -326,15 +340,15 @@ router.put('/out/:id', orderControllerOut.updateOrder);
  *         application/json:
  *           schema:
  *             type: object
- *            required:
- *              - paymentStatus
- *            properties:
- *              id:
- *                type: string
- *                description: Order ID
- *              paymentStatus:
- *                type: string
- *                enum: [pending, processing, paid, failed, refunded]
+ *             required:
+ *               - paymentStatus
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: Order ID
+ *               paymentStatus:
+ *                 type: string
+ *                 enum: [pending, processing, paid, failed, refunded]
  *     responses:
  *       200:
  *         description: Order updated successfully
