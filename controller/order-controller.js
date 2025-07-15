@@ -69,7 +69,10 @@ const orderControllerOut = {
         // publisher.orderupdated(server.channel, Buffer.from(JSON.stringify(req.body)))
         if (order.status === "cancelled") {
           publisher.ordercancelled(server.channel, Buffer.from(JSON.stringify(order)));
+        }else if (order.status === "delivered") {
+          publisher.orderallocatesucess(server.channel, Buffer.from(JSON.stringify(order)));
         }
+
         if (!order) return res.status(404).json({ error: 'Order not found' });
         res.json(order);
       } catch (err) {
@@ -79,17 +82,27 @@ const orderControllerOut = {
     updateOrderPaymentStatus: async (req, res) => {
       try {
         const { paymentStatus } = req.body;
-        const order = await Order.findByIdAndUpdate(req.params.id, { paymentStatus }, { new: true, runValidators: true });
-        publisher.orderpayattempt(server.channel, Buffer.from(JSON.stringify(order)));
-        
+        const order = await Order.findById(req.params.id);
         if (!order) {
           return res.status(404).json({ error: 'Order not found' });
-        } else if (order.paymentStatus !== 'paid') {
-          return res.status(400).json({ error: 'Order payment status is not paid' });
+        // } else if (order.paymentStatus !== 'paid') {
+        //   return res.status(400).json({ error: 'Order payment status is not paid' });
         } else if (order.paymentStatus === 'paid') {
           return res.status(400).json({ error: 'Order payment status is already paid' });
         }
+
+        order.paymentStatus = paymentStatus;
+
+        const savedOrder = await order.save();
+
+        if (!savedOrder) {
+          return res.status(404).json({ error: 'Order not found' });
+        }
+
+        // const order = await Order.findByIdAndUpdate(req.params.id, { paymentStatus }, { new: true, runValidators: true });
+        publisher.orderpayattempt(server.channel, Buffer.from(JSON.stringify(order)));
         
+
         // Publish the order paid event
         publisher.orderpaid(server.channel, Buffer.from(JSON.stringify(order)));
         res.status(200).json(order);
