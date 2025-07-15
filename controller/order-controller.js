@@ -11,7 +11,8 @@ const orderControllerOut = {
         const user = new Order(req.body);
         await user.save();
         // Publish the order created event
-        publisher.ordercreated(server.channel, Buffer.from(JSON.stringify(req.body)))
+        publisher.ordercreated(server.channel, Buffer.from(JSON.stringify(req.body)));
+        publisher.orderallocateattempt(server.channel, Buffer.from(JSON.stringify(user)));
         res.status(201).json(user);
       } catch (err) {
         res.status(400).json({ error: err.message });
@@ -24,7 +25,7 @@ const orderControllerOut = {
         const user = new Order(req.body);
         await user.save();
         // Publish the order created event
-        publisher.ordercreated(server.channel, Buffer.from(JSON.stringify(req.body)))
+        // publisher.ordercreated(server.channel, Buffer.from(JSON.stringify(req.body)))
         res.status(201).json(user);
       } catch (err) {
         res.status(400).json({ error: err.message });
@@ -66,6 +67,9 @@ const orderControllerOut = {
       try {
         const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
         // publisher.orderupdated(server.channel, Buffer.from(JSON.stringify(req.body)))
+        if (order.status === "cancelled") {
+          publisher.ordercancelled(server.channel, Buffer.from(JSON.stringify(order)));
+        }
         if (!order) return res.status(404).json({ error: 'Order not found' });
         res.json(order);
       } catch (err) {
@@ -74,9 +78,18 @@ const orderControllerOut = {
     },
     updateOrderPaymentStatus: async (req, res) => {
       try {
-        const {id, paymentStatus} = req.body;
+        const { paymentStatus } = req.body;
         const order = await Order.findByIdAndUpdate(req.params.id, { paymentStatus }, { new: true, runValidators: true });
-        if (!order) return res.status(404).json({ error: 'Order not found' });
+        publisher.orderpayattempt(server.channel, Buffer.from(JSON.stringify(order)));
+        
+        if (!order) {
+          return res.status(404).json({ error: 'Order not found' });
+        } else if (order.paymentStatus !== 'paid') {
+          return res.status(400).json({ error: 'Order payment status is not paid' });
+        } else if (order.paymentStatus === 'paid') {
+          return res.status(400).json({ error: 'Order payment status is already paid' });
+        }
+        
         // Publish the order paid event
         publisher.orderpaid(server.channel, Buffer.from(JSON.stringify(order)));
         res.status(200).json(order);
