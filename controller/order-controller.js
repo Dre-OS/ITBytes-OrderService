@@ -1,7 +1,7 @@
 const Order = require("../model/order-model");
 const OrderIn = require("../model/orderin-model");
 const axios = require('axios');
-const {server, publisher} = require('./order-messaging-controller');
+const {server, publisher, audit} = require('./order-messaging-controller');
 
 
 const orderControllerOut = {
@@ -13,8 +13,10 @@ const orderControllerOut = {
         // Publish the order created event
         publisher.ordercreated(server.channel, Buffer.from(JSON.stringify(req.body)));
         publisher.orderallocateattempt(server.channel, Buffer.from(JSON.stringify(user)));
+        audit("createOrder", "orderAction", "success", `Order created with ID: ${user._id}`);
         res.status(201).json(user);
       } catch (err) {
+        audit("createOrder", "orderAction", "error", `Failed to create order: ${err.message}`);
         res.status(400).json({ error: err.message });
       }
     },
@@ -26,8 +28,11 @@ const orderControllerOut = {
         await user.save();
         // Publish the order created event
         // publisher.ordercreated(server.channel, Buffer.from(JSON.stringify(req.body)))
+        audit("createOrderIn", "orderInAction", "success", `Order created with ID: ${user._id}`);
+
         res.status(201).json(user);
       } catch (err) {
+        audit("createOrderIn", "orderInAction", "error", `Failed to create order: ${err.message}`);
         res.status(400).json({ error: err.message });
       }
     },
@@ -35,8 +40,14 @@ const orderControllerOut = {
     getAllOrders: async (req, res) => {
       try {
         const orders = await Order.find();
+        if(!orders){
+            audit("getAllOrders", "orderAction", "error", `No orders found`);
+            return res.status(404).json({ message: "No orders found" });
+        } 
+        audit("getAllOrders", "orderAction", "success", `Orders Fetched`);
         res.status(200).json(orders);
       } catch (err) {
+        audit("getAllOrders", "orderAction", "error", `Failed to fetch orders: ${err.message}`);
         res.status(500).json({ error: err.message });
       }
     },
@@ -45,10 +56,12 @@ const orderControllerOut = {
       try {
         const order = await Order.findById(req.params.id);
         if (!order) {
+          audit("getOrderById", "orderAction", "error", `Order with ID ${req.params.id} not found`);
           return res.status(404).json({ error: "Order not found" });
         }
         res.status(200).json(order);
       } catch (err) {
+        audit("getOrderById", "orderAction", "error", `Failed to get order with ID ${req.params.id}: ${err.message}`);
         res.status(500).json({ error: err.message });
       }
     },
@@ -74,6 +87,7 @@ const orderControllerOut = {
         }
 
         if (!order) return res.status(404).json({ error: 'Order not found' });
+        audit("updateOrder", "orderAction", "success", `Order updated with ID: ${req.params.id}`);
         res.json(order);
       } catch (err) {
         res.status(400).json({ error: err.message });
