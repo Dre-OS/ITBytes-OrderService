@@ -44,7 +44,7 @@ const orderControllerOut = {
             audit("getAllOrders", "orderAction", "error", `No orders found`);
             return res.status(404).json({ message: "No orders found" });
         } 
-        audit("getAllOrders", "orderAction", "success", `Orders Fetched`);
+        // audit("getAllOrders", "orderAction", "success", `Orders Fetched`);
         res.status(200).json(orders);
       } catch (err) {
         audit("getAllOrders", "orderAction", "error", `Failed to fetch orders: ${err.message}`);
